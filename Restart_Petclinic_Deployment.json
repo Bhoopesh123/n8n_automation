@@ -1,0 +1,140 @@
+{
+  "name": "Restart Petclinic Deployment",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "7a0e4c60-fde4-480c-b546-d580dc346a7d",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        352,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "deployment",
+              "value": "petclinic"
+            },
+            {
+              "name": "namespace",
+              "value": "n8n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f79f6b48-6a53-451a-a591-5e926651e462",
+      "name": "Set Deployment Values",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        656,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=kubectl rollout restart deployment petclinic -n n8n\n"
+      },
+      "id": "724e10ca-4ee3-4302-afb8-41fc103c27bc",
+      "name": "Restart Deployment",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        960,
+        -80
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "functionCode": "return [{ json: { message: `Deployment '${$json.deployment}' restarted successfully in namespace '${$json.namespace}'!` } }];"
+      },
+      "id": "dff89f40-f97d-4730-96a5-579a9733fc4b",
+      "name": "Response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "path": "8c9a4ec2-6c5d-44db-9f54-363c5769959d",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        352,
+        -240
+      ],
+      "id": "f0a45c66-8e00-4b37-88f7-f3726e9f474b",
+      "name": "Webhook",
+      "webhookId": "8c9a4ec2-6c5d-44db-9f54-363c5769959d"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Deployment Values",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Deployment Values": {
+      "main": [
+        [
+          {
+            "node": "Restart Deployment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restart Deployment": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set Deployment Values",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ede76cab-a2b8-49b5-bae5-89ec619af025",
+  "meta": {
+    "instanceId": "b79fe2343e01bed23006617a0728334172e888be880d5daa453e042677a39d7f"
+  },
+  "id": "HHIljfLCAr0vvrxz",
+  "tags": []
+}

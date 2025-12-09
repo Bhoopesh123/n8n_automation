@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: n8n
+  namespace: n8n
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: n8n
+  template:
+    metadata:
+      labels:
+        app: n8n
+    spec:
+      serviceAccountName: n8n-sa   # REQUIRED for RBAC
+      volumes:
+        - name: n8n-data
+          persistentVolumeClaim:
+            claimName: n8n-pvc
+        - name: kubectl-bin
+          emptyDir: {}
+      initContainers:
+        - name: install-kubectl
+          image: bitnami/kubectl:latest
+          command:
+            - sh
+            - -c
+            - |
+              cp /opt/bitnami/kubectl/bin/kubectl /tmp/kubectl
+          volumeMounts:
+            - name: kubectl-bin
+              mountPath: /tmp
+      containers:
+        - name: n8n
+          image: n8nio/n8n:latest
+          ports:
+            - containerPort: 5678
+          volumeMounts:
+            - name: n8n-data
+              mountPath: /home/node/.n8n
+            - name: kubectl-bin
+              mountPath: /usr/local/bin/kubectl
+              subPath: kubectl
